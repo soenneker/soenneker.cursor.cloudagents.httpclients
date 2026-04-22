@@ -1,20 +1,19 @@
 using Soenneker.Cursor.CloudAgents.HttpClients.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Cursor.CloudAgents.HttpClients.Tests;
 
-[Collection("Collection")]
-public sealed class CursorCloudAgentsOpenApiHttpClientTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class CursorCloudAgentsOpenApiHttpClientTests : HostedUnitTest
 {
     private readonly ICursorCloudAgentsOpenApiHttpClient _httpclient;
 
-    public CursorCloudAgentsOpenApiHttpClientTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public CursorCloudAgentsOpenApiHttpClientTests(Host host) : base(host)
     {
         _httpclient = Resolve<ICursorCloudAgentsOpenApiHttpClient>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
