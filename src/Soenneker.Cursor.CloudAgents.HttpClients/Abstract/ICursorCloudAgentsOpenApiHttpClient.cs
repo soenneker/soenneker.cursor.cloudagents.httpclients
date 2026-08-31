@@ -6,14 +6,14 @@ using System.Threading;
 namespace Soenneker.Cursor.CloudAgents.HttpClients.Abstract;
 
 /// <summary>
-/// A .NET thread-safe singleton HttpClient for 
+/// Provides a cached, authenticated <see cref="HttpClient"/> for Cursor's Cloud Agents API.
 /// </summary>
 public interface ICursorCloudAgentsOpenApiHttpClient: IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Gets the value.
+    /// Gets the client owned by this provider.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A task containing the result of the operation.</returns>
+    /// <returns>The configured Cursor client.</returns>
     ValueTask<HttpClient> Get(CancellationToken cancellationToken = default);
 }

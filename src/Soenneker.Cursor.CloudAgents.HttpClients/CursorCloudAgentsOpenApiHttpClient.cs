@@ -16,6 +16,7 @@ public sealed class CursorCloudAgentsOpenApiHttpClient : ICursorCloudAgentsOpenA
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly IConfiguration _config;
+    private readonly string _cacheKey = $"{nameof(CursorCloudAgentsOpenApiHttpClient)}:{Guid.NewGuid():N}";
 
     private const string _prodBaseUrl = "https://api.cursor.com/";
 
@@ -27,16 +28,16 @@ public sealed class CursorCloudAgentsOpenApiHttpClient : ICursorCloudAgentsOpenA
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(CursorCloudAgentsOpenApiHttpClient), (config: _config, baseUrl: _config["CloudAgents:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["CloudAgents:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
             var apiKey = state.config.GetValueStrict<string>("Cursor:ApiKey");
-            string authHeaderName = state.config["CloudAgents:AuthHeaderName"] ?? "Bearer {token}";
-            string authHeaderValueTemplate = state.config["CloudAgents:AuthHeaderValueTemplate"] ?? "{token}";
+            string authHeaderName = state.config["CloudAgents:AuthHeaderName"] ?? "Authorization";
+            string authHeaderValueTemplate = state.config["CloudAgents:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
 
             return new HttpClientOptions
             {
-                BaseAddress = new Uri(state.baseUrl),
+                BaseAddress = new Uri(state.baseUrl.TrimEnd('/') + '/'),
                 DefaultRequestHeaders = new Dictionary<string, string>
                 {
                     {authHeaderName, authHeaderValue},
@@ -45,20 +46,13 @@ public sealed class CursorCloudAgentsOpenApiHttpClient : ICursorCloudAgentsOpenA
         }, cancellationToken);
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(CursorCloudAgentsOpenApiHttpClient));
+        _httpClientCache.RemoveSync(_cacheKey);
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(CursorCloudAgentsOpenApiHttpClient));
+        return _httpClientCache.Remove(_cacheKey);
     }
 }
