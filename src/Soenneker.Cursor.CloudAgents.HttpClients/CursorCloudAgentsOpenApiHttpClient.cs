@@ -30,7 +30,7 @@ public sealed class CursorCloudAgentsOpenApiHttpClient : ICursorCloudAgentsOpenA
     {
         return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["CloudAgents:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            var apiKey = state.config.GetValueStrict<string>("Cursor:ApiKey");
+            var apiKey = state.config.GetStringStrict("Cursor:ApiKey");
             string authHeaderName = state.config["CloudAgents:AuthHeaderName"] ?? "Authorization";
             string authHeaderValueTemplate = state.config["CloudAgents:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
